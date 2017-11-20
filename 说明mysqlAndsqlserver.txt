@@ -1,0 +1,29 @@
+github项目地址
+https://github.com/dongnian2/springboot-mybatis.git
+
+项目 war
+http://download.csdn.net/download/u014596302/10125815
+
+
+
+
+1. cd到项目目录 然后 git clone https://github.com/dongnian2/springboot-mybatis.git
+2. 将项目子文件 复制到 生成的文件夹下
+3. 
+	git add .        （注：别忘记后面的.，此操作是把Test文件夹下面的文件都添加进来）
+
+	git commit  -m  "提交信息"  （注：“提交信息”里面换成你需要，如“first commit”）
+
+	git push -u origin master   （注：此操作目的是把本地仓库push到github上面，此步骤需要你输入帐号和密码）
+
+4.over 上传完毕可以看到文件
+
+
+5.修改 文件后可以
+将修改代码提交到本地仓库
+git commit -a -m "修改了XXXXXX文件"
+将同步代码更新到远程仓库
+git push
+
+从远程仓库更新代码
+git pull
