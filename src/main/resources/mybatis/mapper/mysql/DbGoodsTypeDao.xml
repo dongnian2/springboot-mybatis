@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.springboot.mapper.mysql.goods.DbGoodsTypeDao">
+    
+	<sql id="dbGoodsTypeColumns">
+		a.id AS "id",
+		a.type as "type",
+		a.cust_id as "custId",
+		a.type_name AS "typeName",
+		a.depict AS "depict",
+		a.gds_tparent AS "gdsTparent.id",
+		a.en_name AS "enName",
+		a.gds_tcode AS "gdsTcode",
+		a.del_flag AS "delFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="dbGoodsTypeJoins">
+	</sql>
+	
+    <resultMap type="com.springboot.entity.goods.DbGoodsType" id="DbGoodsTypeResult" autoMapping="true">
+    	<result column="depict" property="depict"   typeHandler="com.springboot.entity.baseentity.ConvertBlobTypeHandler"/>
+    </resultMap>
+    
+	<select id="get" resultMap="DbGoodsTypeResult" >
+		SELECT 
+			<include refid="dbGoodsTypeColumns"/>
+		FROM db_goods_type a
+		<include refid="dbGoodsTypeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultMap="DbGoodsTypeResult" >
+		SELECT 
+			<include refid="dbGoodsTypeColumns"/>
+		FROM db_goods_type a
+		<include refid="dbGoodsTypeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="custId !=null and custId !='' ">
+				and a.cust_id =#{custId}
+			</if>
+			<if test="type !=null ">
+				and a.type =#{type}
+			</if>
+			<if test="typeName != null and typeName != ''">
+				AND a.type_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{typeName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{typeName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{typeName},'%')</if>
+			</if>
+			<if test="gdsTparent !=null and gdsTparent.id !=null and gdsTparent.id !=''">
+				and a.gds_tparent = #{gdsTparent.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultMap="DbGoodsTypeResult" >
+		SELECT 
+			<include refid="dbGoodsTypeColumns"/>
+		FROM db_goods_type a
+		<include refid="dbGoodsTypeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO db_goods_type(
+			id,
+			type,cust_id,
+			type_name,
+			depict,
+			gds_tparent,
+			en_name,
+			gds_tcode,
+			del_flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},#{type},#{custId},
+			#{typeName},
+			#{depict},
+			#{gdsTparent.id},
+			#{enName},
+			#{gdsTcode},
+			#{delFlag},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE db_goods_type SET 	
+			type_name = #{typeName},
+			type =#{type},
+			cust_id = #{custId},
+			depict = #{depict},
+			gds_tparent = #{gdsTparent.id},
+			en_name = #{enName},
+			gds_tcode = #{gdsTcode},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM db_goods_type
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE db_goods_type SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="com.springboot.entity.goods.DbGoodsType" statementType="STATEMENT">
+		select * FROM db_goods_type  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

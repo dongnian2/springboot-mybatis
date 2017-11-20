@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.springboot.mapper.mysql.goods.DbGdsIndetailDao">
+    
+	<sql id="dbGdsIndetailColumns">
+		a.id AS "id",
+		a.gds_inid AS "gdsInid",
+		a.gds_id AS "goods.id",
+		a.gds_qty AS "gdsQty",
+		a.gds_batch AS "gdsBatch",
+		g.gds_unit as "goods.gdsUnit",
+		g.gds_spec as "goods.gdsSpec",
+		g.gds_name as "goods.gdsName",
+		b.gds_price as "price",
+		g.gtype_id as "goods.goodsType.id",
+		ty.type_name as "goods.goodsType.typeName",
+		b.gds_batch as "gdsBatchName"
+		
+	</sql>
+	
+	<sql id="dbGdsIndetailJoins">
+		left join db_goods g  on g.id = a.gds_id
+		left join db_gds_batch b on (b.id =a.gds_batch  and  g.id = b.gds_id )
+		left join db_goods_type ty on ty.id  = g.gtype_id
+	</sql>
+	
+    
+	<select id="get" resultType="com.springboot.entity.goods.DbGdsIndetail" >
+		SELECT 
+			<include refid="dbGdsIndetailColumns"/>
+		FROM db_gds_indetail a
+		<include refid="dbGdsIndetailJoins"/>
+		WHERE a.id = #{id}
+		     
+	</select>
+	
+	<select id="findList" resultType="com.springboot.entity.goods.DbGdsIndetail" >
+		SELECT 
+			<include refid="dbGdsIndetailColumns"/>
+		FROM db_gds_indetail a
+		<include refid="dbGdsIndetailJoins"/>
+		<where>
+		    <if test="gdsInid !=null and gdsInid !='' ">
+		    	and gds_inid =#{gdsInid}
+		    </if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="com.springboot.entity.goods.DbGdsIndetail" >
+		SELECT 
+			<include refid="dbGdsIndetailColumns"/>
+		FROM db_gds_indetail a
+		<include refid="dbGdsIndetailJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO db_gds_indetail(
+			id,
+			gds_inid,
+			gds_id,
+			gds_qty,
+			gds_batch 
+		) VALUES (
+			#{id},
+			#{gdsInid},
+			#{goods.id},
+			#{gdsQty},
+			#{gdsBatch}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE db_gds_indetail SET 	
+			gds_inid = #{gdsInid},
+			gds_id = #{goods.id},
+			gds_qty = #{gdsQty},
+			gds_batch =#{gdsBatch}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM db_gds_indetail
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE db_gds_indetail SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="com.springboot.entity.goods.DbGdsIndetail" statementType="STATEMENT">
+		select * FROM db_gds_indetail  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

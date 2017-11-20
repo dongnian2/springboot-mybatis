@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.springboot.mapper.mysql.goods.DbGoodsDao">
+    
+	<sql id="dbGoodsColumns">
+		a.id AS "id",
+		a.cust_id AS "custId",
+		a.gtype_id as "goodsType.id",
+		a.gds_code as "gdsCode",
+		a.gds_name AS "gdsName",
+		a.gds_unit AS "gdsUnit",
+		a.gds_spec AS  "gdsSpec",
+		a.gds_desc AS "gdsDesc",
+		a.create_by AS "createBy",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		t.type_name as "goodsType.typeName"
+	</sql>
+	
+	<sql id="dbGoodsJoins">
+	  left join db_goods_type t on t.id = a.gtype_id
+	</sql>
+	
+    
+	<select id="get" resultType="com.springboot.entity.goods.DbGoods" >
+		SELECT 
+			<include refid="dbGoodsColumns"/>
+		FROM db_goods a
+		<include refid="dbGoodsJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.springboot.entity.goods.DbGoods" >
+		SELECT 
+			<include refid="dbGoodsColumns"/>
+		FROM db_goods a
+		<include refid="dbGoodsJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="gdsName !=null and gdsName !='' ">
+				and a.gds_name LIKE 				  
+			    
+					<if test="dbName == 'oracle'">'%'||#{gdsName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{gdsName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{gdsName},'%')</if>
+			</if>
+			<if test="goodsType !=null and goodsType.id !=null and goodsType.id !='' ">
+				and a.gtype_id = #{goodsType.id}
+			</if>
+			<if test="goodsType !=null and goodsType.type !=null">
+				and t.type = #{goodsType.type}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 根据物料名称查物料 -->
+	<select id="findDbGoodsByGdsName" resultType="com.springboot.entity.goods.DbGoods" >
+		SELECT 
+			<include refid="dbGoodsColumns"/>
+		FROM db_goods a
+		<include refid="dbGoodsJoins"/>
+		where a.gds_name = #{gdsName}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO db_goods(
+			id,
+			cust_id,
+			gtype_id,
+			gds_code,
+			gds_name,
+			gds_unit,
+			gds_desc,
+			gds_spec,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{custId},
+			#{goodsType.id},
+			#{gdsCode},
+			#{gdsName},
+			#{gdsUnit},
+			#{gdsDesc},
+			#{gdsSpec},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE db_goods SET 	
+			cust_id = #{custId},
+			gtype_id =#{goodsType.id},
+			gds_code =#{gdsCode},
+			gds_name = #{gdsName},
+			gds_unit = #{gdsUnit},
+			gds_desc = #{gdsDesc},
+			gds_spec =#{gdsSpec},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	
+	
+</mapper>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.springboot.mapper.mysql.goods.DbGdsPropDao">
+    
+	<sql id="dbGdsPropColumns">
+		a.id AS "id",
+		a.gds_id AS "goods.id",
+		a.prop_name AS "propName",
+		a.prop_cont AS "propCont",
+		a.prop_desc as "propDesc",
+		a.del_flag AS "delFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		g.gds_name as "goods.gdsName"
+	</sql>
+	
+	<sql id="dbGdsPropJoins">
+	  left join db_goods g on g.id = a.gds_id
+	</sql>
+	
+    
+	<select id="get" resultType="com.springboot.entity.goods.DbGdsProp" >
+		SELECT 
+			<include refid="dbGdsPropColumns"/>
+		FROM db_gds_prop a
+		<include refid="dbGdsPropJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.springboot.entity.goods.DbGdsProp" >
+		SELECT 
+			<include refid="dbGdsPropColumns"/>
+		FROM db_gds_prop a
+		<include refid="dbGdsPropJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="goods !=null and goods.id !=null and goods.id !='' ">
+			and g.id =#{goods.id}
+			</if>
+			<if test="propName != null and propName != ''">
+				AND a.prop_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{propName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{propName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{propName},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="com.springboot.entity.goods.DbGdsProp" >
+		SELECT 
+			<include refid="dbGdsPropColumns"/>
+		FROM db_gds_prop a
+		<include refid="dbGdsPropJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO db_gds_prop(
+			id,
+			gds_id,
+			prop_name,
+			prop_cont,
+			prop_desc,
+			del_flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{goods.id},
+			#{propName},
+			#{propCont},
+			#{propDesc},
+			#{delFlag},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE db_gds_prop SET 	
+			gds_id = #{goods.id},
+			prop_name = #{propName},
+			prop_cont = #{propCont},
+			prop_desc =#{propDesc},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM db_gds_prop
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE db_gds_prop SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="com.springboot.entity.goods.DbGdsProp" statementType="STATEMENT">
+		select * FROM db_gds_prop  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.springboot.mapper.sqlserver.SqlserverMapper" >
+    
+    <sql id="Base_Column_List" >
+    a.WPMC AS "wpmc",
+	a.WPDM AS "wpdm",
+	a.WPTM AS "wptm",
+	a.GG AS "gg",
+	a.CGRQ AS "cgrq",
+	a.DW AS "dw",
+	a.DJ AS "dj",
+	a.SL AS "sl",
+	a.SUMSL AS "sumsl",
+	a.KCSL AS "kcsl",
+	a.KCJE AS "kcje",
+	a.GHDW AS "ghdw",
+	a.FPH AS "fph",
+	a.YXQ AS "yxq",
+	a.SCPH AS "scph",
+	a.PZH AS "pzh",
+	a.FLDM AS "fldm",
+	a.FLMC AS "flmc",
+	a.CZY AS "czy",
+	a.GUID AS "guid",
+	a.PYM AS "pym",
+	a.BZ AS "bz"
+    </sql>
+
+
+    <select id="findView" resultType="com.springboot.entity.JXCkxx"  >
+       SELECT 
+       <include refid="Base_Column_List" />
+	   FROM JX_ckxx a
+    </select>
+
+</mapper>

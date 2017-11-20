@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.springboot.mapper.mysql.warehouse.DbWarehouseDao">
+    
+	<sql id="dbWarehouseColumns">
+		a.id AS "id",
+		a.wh_type AS "whType",
+		a.cust_id AS "office.id",
+		a.wh_name AS "whName",
+		a.wh_desc AS "whDesc",
+		a.wh_flag as "whFlag",
+		a.del_flag as "delFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		office.name AS "office.name"
+	</sql>
+	<sql id="dbWarehouseOfficeColumns">
+		a.id AS "id",
+		a.wh_type AS "whType",
+		a.cust_id AS "office.id",
+		a.wh_name AS "whName",
+		a.wh_desc AS "whDesc",
+		a.wh_flag as "whFlag",
+		a.del_flag as "delFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	<sql id="dbWarehouseJoins">
+		LEFT JOIN sys_office office ON office.id = a.cust_id
+		LEFT JOIN sys_user createBy ON createBy.id = a.create_by
+		LEFT JOIN sys_user updateBy ON updateBy.id = a.update_by
+	</sql>
+	
+    
+	<select id="get" resultType="com.springboot.entity.warehouse.DbWarehouse" >
+		SELECT 
+			<include refid="dbWarehouseColumns"/>
+		FROM db_warehouse a
+		<include refid="dbWarehouseJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.springboot.entity.warehouse.DbWarehouse" >
+		SELECT 
+			<include refid="dbWarehouseColumns"/>
+		FROM db_warehouse a
+		<include refid="dbWarehouseJoins"/>
+		<where>
+			 a.del_flag =0
+			<if test="whType != null and whType != ''">
+				AND a.wh_type = #{whType}
+			</if>
+			<if test="whFlag !=null  "> 
+				and a.wh_flag =#{whFlag}
+			</if>
+			<if test="office != null and office.id != null and office.id != ''">
+				AND a.cust_id = #{office.id}
+			</if>
+			<if test="whName != null and whName != ''">
+				AND a.wh_name like  
+				<if test="dbName == 'oracle'">'%'||#{whName}</if>
+				<if test="dbName == 'mssql'">'%'+#{whName}</if>
+				<if test="dbName == 'mysql'">concat('%',#{whName})</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="com.springboot.entity.warehouse.DbWarehouse" >
+		SELECT 
+			<include refid="dbWarehouseColumns"/>
+		FROM db_warehouse a
+		<include refid="dbWarehouseJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO db_warehouse(
+			id,
+			wh_type,
+			cust_id,
+			wh_name,
+			wh_desc,
+			wh_flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{whType},
+			#{office.id},
+			#{whName},
+			#{whDesc},
+			#{whFlag},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE db_warehouse SET 	
+			wh_type = #{whType},
+			cust_id = #{office.id},
+			wh_name = #{whName},
+			wh_desc = #{whDesc},
+			wh_flag =#{whFlag},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			del_flag =#{delFlag}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM db_warehouse
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE db_warehouse SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="com.springboot.entity.warehouse.DbWarehouse" statementType="STATEMENT">
+		select * FROM db_warehouse  where ${propertyName} = '${value}'
+	</select>
+	<!-- 根据物料 -->
+	<select id="findWhOfficeList" resultType="com.springboot.entity.warehouse.DbWarehouse">
+	 	SELECT
+				<include refid="dbWarehouseOfficeColumns"/>
+		FROM
+			db_warehouse a
+		LEFT JOIN db_wh_office o ON o.wh_id = a.id
+		<where>
+			a.del_flag =0
+		    <if test="whFlag !=null ">
+		    	and a.wh_flag =#{whFlag}
+		    </if>
+			<if test="custId !=null and custId !='' ">
+			 	AND a.cust_id = #{custId}
+			 </if>
+			 <if test="officeId !=null and officeId !='' ">
+			 	AND o.office_id = #{officeId}
+			 </if>
+			
+		</where>
+		
+	</select>
+	
+</mapper>
